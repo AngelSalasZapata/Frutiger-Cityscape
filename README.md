@@ -53,7 +53,7 @@ manualmente con `workflow_dispatch`) y falla si el tag no coincide con la versi�
 | `npm run lint`        | ESLint sobre todo el repo.                                         |
 | `npm run format`      | Prettier sobre todo el repo.                                       |
 | `npm run test`        | Pruebas unitarias con Vitest.                                      |
-| `npm run models`      | Regenera los 46 modelos glTF procedurales de `public/assets`.      |
+| `npm run models`      | Regenera los 47 modelos glTF procedurales de `public/assets`.      |
 
 ## Publicar una release
 
@@ -168,7 +168,7 @@ elige recorridos aéreos aleatorios con una altura máxima acotada y aterriza pe
 habitantes. Los NPCs cercanos pueden abordar auto, bus, lancha o globo y bajan después de un breve paseo;
 el bus dispone de cuatro plazas y los demás de una.
 
-La sección Vehículos incluye cuatro GLB remasterizados y escalados para el diorama: **Auto compacto**,
+La sección Vehículos incluye cuatro GLB generados, estilizados y escalados para el diorama: **Auto compacto**,
 **Autobús urbano**, **Lancha a motor** y **Globo Aero**. El vehículo vial seleccionado se puede conducir
 con las **flechas**: arriba/abajo acelera o frena e izquierda/derecha gira. Soltar las teclas lo devuelve
 al tráfico.

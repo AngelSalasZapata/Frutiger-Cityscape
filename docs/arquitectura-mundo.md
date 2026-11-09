@@ -89,7 +89,7 @@ fusiona, valida ids únicos, categorías, huellas enteras, física, paleta, tema
 del GLB llevan nombres de ranura; `applyThemeMaterials` los sustituye por los materiales cacheados
 del tema activo, de modo que cambiar de tema no requiere volver a cargar modelos.
 
-Los 46 `.glb` son procedurales: `tools/model-kit.mjs` arma geometrías y materiales, y
+Los 47 `.glb` son procedurales: `tools/model-kit.mjs` arma geometrías y materiales, y
 `tools/generate-models.mjs` los exporta con `GLTFExporter` a `public/assets/models`. Para regenerarlos:
 
 ```bash
@@ -218,8 +218,10 @@ vial seleccionado se controla con flechas y vuelve al tráfico al soltarlas.
 
 `NpcSystem` reserva plazas cuando un habitante se encuentra cerca de un vehículo disponible, sincroniza su
 pose con el pasajero durante un paseo corto y lo libera después. La lancha y el globo solo son abordables
-cuando alcanzan una altura cercana al suelo/agua. El catálogo v0.6.1 reemplaza todos los vehículos por
-`car_aero`, `bus_aero`, `boat_aero` y `balloon_aero` en `public/assets/models/vehicles/`.
+cuando alcanzan una altura cercana al suelo/agua. El catálogo v0.6.2 reemplaza todos los vehículos por
+`car_aero`, `bus_aero`, `boat_aero` y `balloon_aero` en `public/assets/models/vehicles/`. Estos assets
+se generan en `tools/model-vehicles.mjs`: usan geometrías compactas, materiales de ranura Aero y
+dimensiones nativas del diorama, sin depender de los GLB de referencia de alta densidad.
 
 ## Empaquetado de escritorio
 

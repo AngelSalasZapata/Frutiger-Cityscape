@@ -55,9 +55,11 @@ describe('Catálogo', () => {
   })
 
   it('declara un medio de desplazamiento para cada vehículo', () => {
-    const behaviors = allCatalogItems('vehicle').map((vehicle) => vehicle.vehicleBehavior)
+    const vehicles = allCatalogItems('vehicle')
+    const behaviors = vehicles.map((vehicle) => vehicle.vehicleBehavior)
     expect(behaviors).toEqual(expect.arrayContaining(['road', 'water', 'air']))
     expect(behaviors.every(Boolean)).toBe(true)
+    expect(vehicles.every((vehicle) => vehicle.scale === undefined)).toBe(true)
   })
 
   it('referencia temas existentes o el comodín global', () => {

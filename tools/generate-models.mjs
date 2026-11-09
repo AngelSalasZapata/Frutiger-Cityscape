@@ -8,6 +8,7 @@ import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js'
 import { AUTO_TILE_VARIANTS, buildAutoTile } from './model-autotile.mjs'
 import * as buildings from './model-buildings.mjs'
 import * as scenery from './model-scenery.mjs'
+import * as vehicles from './model-vehicles.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const outputRoot = join(root, 'public', 'assets', 'models')
@@ -62,9 +63,10 @@ const MODELS = [
   ['props/neon_sign.glb', scenery.neonSign],
   ['props/dorf_orb.glb', scenery.dorfOrb],
   ['props/metro_arch.glb', scenery.metroArch],
-  ['vehicles/car_aero.glb', scenery.carAero],
-  ['vehicles/bus_aero.glb', scenery.busAero],
-  ['vehicles/boat_aero.glb', scenery.boatAero],
+  ['vehicles/car_aero.glb', vehicles.carAero],
+  ['vehicles/bus_aero.glb', vehicles.busAero],
+  ['vehicles/boat_aero.glb', vehicles.boatAero],
+  ['vehicles/balloon_aero.glb', vehicles.balloonAero],
 ]
 
 const AUTO_TILES = ['path_stone', 'fence_white'].flatMap((style) =>
