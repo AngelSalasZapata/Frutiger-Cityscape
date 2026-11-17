@@ -42,18 +42,18 @@ manualmente con `workflow_dispatch`) y falla si el tag no coincide con la versi�
 
 ## Scripts
 
-| Comando               | Descripción                                                        |
-| --------------------- | ------------------------------------------------------------------ |
-| `npm run dev`         | Servidor de desarrollo web con HMR en `http://localhost:5173`.     |
-| `npm run dev:desktop` | Vite + Electron en modo desarrollo.                                |
-| `npm run build`       | Typecheck, build del renderer y compilación del proceso principal. |
-| `npm run dist`        | Build + instalador de escritorio para el sistema actual.           |
-| `npm run dist:win`    | Instalador NSIS para Windows.                                      |
-| `npm run typecheck`   | TypeScript estricto en renderer y Electron.                        |
-| `npm run lint`        | ESLint sobre todo el repo.                                         |
-| `npm run format`      | Prettier sobre todo el repo.                                       |
-| `npm run test`        | Pruebas unitarias con Vitest.                                      |
-| `npm run models`      | Regenera los 47 modelos glTF procedurales de `public/assets`.      |
+| Comando               | Descripción                                                         |
+| --------------------- | ------------------------------------------------------------------- |
+| `npm run dev`         | Servidor de desarrollo web con HMR en `http://localhost:5173`.      |
+| `npm run dev:desktop` | Vite + Electron en modo desarrollo.                                 |
+| `npm run build`       | Typecheck, build del renderer y compilación del proceso principal.  |
+| `npm run dist`        | Build + instalador de escritorio para el sistema actual.            |
+| `npm run dist:win`    | Instalador NSIS para Windows.                                       |
+| `npm run typecheck`   | TypeScript estricto en renderer y Electron.                         |
+| `npm run lint`        | ESLint sobre todo el repo.                                          |
+| `npm run format`      | Prettier sobre todo el repo.                                        |
+| `npm run test`        | Pruebas unitarias con Vitest.                                       |
+| `npm run models`      | Regenera 29 GLB procedurales; conserva los 18 modelos interactivos. |
 
 ## Publicar una release
 
@@ -168,7 +168,7 @@ elige recorridos aéreos aleatorios con una altura máxima acotada y aterriza pe
 habitantes. Los NPCs cercanos pueden abordar auto, bus, lancha o globo y bajan después de un breve paseo;
 el bus dispone de cuatro plazas y los demás de una.
 
-La sección Vehículos incluye cuatro GLB generados, estilizados y escalados para el diorama: **Auto compacto**,
+La sección Vehículos incluye cuatro GLB interactivos, estilizados y escalados para el diorama: **Auto compacto**,
 **Autobús urbano**, **Lancha a motor** y **Globo Aero**. El vehículo vial seleccionado se puede conducir
 con las **flechas**: arriba/abajo acelera o frena e izquierda/derecha gira. Soltar las teclas lo devuelve
 al tráfico.

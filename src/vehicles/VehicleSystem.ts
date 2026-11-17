@@ -14,6 +14,8 @@ interface VehicleState {
   heading: number
   speed: number
   nextLanding: number
+  mixer: THREE.AnimationMixer | null
+  wheelAction: THREE.AnimationAction | null
 }
 
 const ROAD_SPEED = 1.15
@@ -64,6 +66,7 @@ export class VehicleSystem {
       else if (behavior === 'road' && roads.size > 0) this.driveRoad(vehicle, state, roads, dt)
       else if (behavior === 'water') this.driveWater(vehicle, state, dt)
       else if (behavior === 'air') this.driveAir(vehicle, state, dt)
+      this.updateModelAnimations(state, dt)
     }
   }
 
@@ -120,6 +123,7 @@ export class VehicleSystem {
     for (const id of this.passengers.keys()) if (!ids.has(id)) this.passengers.delete(id)
     for (const vehicle of vehicles) {
       if (this.states.has(vehicle.id)) continue
+      const animation = this.createWheelAnimation(vehicle)
       this.states.set(vehicle.id, {
         route: [],
         routeIndex: 0,
@@ -128,6 +132,8 @@ export class VehicleSystem {
         heading: vehicle.object.rotation.y,
         speed: 0,
         nextLanding: this.elapsed + 8 + Math.random() * 12,
+        mixer: animation.mixer,
+        wheelAction: animation.wheelAction,
       })
     }
   }
@@ -146,9 +152,11 @@ export class VehicleSystem {
     if (distance < 0.08) {
       state.position.copy(target)
       state.routeIndex += 1
+      state.speed = 0
       return
     }
     const speed = ROAD_SPEED * this.trafficFactor(vehicle.id, state, targetCell, roads)
+    state.speed = speed
     this.moveToward(vehicle, state, target, Math.min(distance, speed * dt), true)
   }
 
@@ -157,6 +165,7 @@ export class VehicleSystem {
       state.target = this.randomWaterTarget()
     }
     this.moveToward(vehicle, state, state.target, WATER_SPEED * dt, false)
+    state.speed = 0
     vehicle.modelHolder.position.y = Math.sin(this.elapsed * 2.3 + state.heading) * 0.045
     vehicle.modelHolder.rotation.z = Math.sin(this.elapsed * 1.6 + state.heading) * 0.035
   }
@@ -168,6 +177,7 @@ export class VehicleSystem {
       if (landing) state.nextLanding = this.elapsed + 14 + Math.random() * 16
     }
     this.moveToward(vehicle, state, state.target, AIR_SPEED * dt, false)
+    state.speed = 0
     vehicle.modelHolder.position.y = Math.sin(this.elapsed * 1.35 + state.heading) * 0.09
   }
 
@@ -182,7 +192,7 @@ export class VehicleSystem {
       this.city.worldGrid.worldToCell(state.position.x, state.position.z) ?? vehicle.record.anchor
     state.position.y = this.city.groundHeightAt(cell) + 0.035
     this.applyPose(vehicle, state)
-    this.spinWheels(vehicle, Math.abs(state.speed) * dt)
+    if (!state.wheelAction) this.spinWheels(vehicle, Math.abs(state.speed) * dt)
   }
 
   private createRoadRoute(state: VehicleState, roads: ReadonlySet<string>): void {
@@ -234,7 +244,7 @@ export class VehicleSystem {
     state.position.addScaledVector(direction, Math.min(distance, state.position.distanceTo(target)))
     if (ground) state.position.y = target.y
     this.applyPose(vehicle, state)
-    if (ground) this.spinWheels(vehicle, distance)
+    if (ground && !state.wheelAction) this.spinWheels(vehicle, distance)
   }
 
   private applyPose(vehicle: PlacedInstance, state: VehicleState): void {
@@ -249,6 +259,29 @@ export class VehicleSystem {
     vehicle.modelHolder.traverse((object) => {
       if (/wheel|roda|pneu|tire/i.test(object.name)) object.rotation.x += distance * 7
     })
+  }
+
+  private createWheelAnimation(vehicle: PlacedInstance): {
+    mixer: THREE.AnimationMixer | null
+    wheelAction: THREE.AnimationAction | null
+  } {
+    const model = vehicle.modelHolder.children[0]
+    const clips = model?.userData.animationClips as readonly THREE.AnimationClip[] | undefined
+    const clip = clips?.find((candidate) => candidate.name === 'Wheels_Roll')
+    if (!model || !clip) return { mixer: null, wheelAction: null }
+
+    const mixer = new THREE.AnimationMixer(model)
+    const wheelAction = mixer.clipAction(clip)
+    wheelAction.setLoop(THREE.LoopRepeat, Infinity).play()
+    wheelAction.paused = true
+    return { mixer, wheelAction }
+  }
+
+  private updateModelAnimations(state: VehicleState, dt: number): void {
+    if (!state.mixer || !state.wheelAction) return
+    state.wheelAction.paused = state.speed < 0.02
+    state.wheelAction.setEffectiveTimeScale(Math.max(0.1, state.speed * 1.6))
+    state.mixer.update(dt)
   }
 
   private canBoard(vehicle: PlacedInstance): boolean {

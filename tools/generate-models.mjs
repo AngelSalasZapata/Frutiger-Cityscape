@@ -6,9 +6,7 @@ import * as THREE from 'three'
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js'
 
 import { AUTO_TILE_VARIANTS, buildAutoTile } from './model-autotile.mjs'
-import * as buildings from './model-buildings.mjs'
 import * as scenery from './model-scenery.mjs'
-import * as vehicles from './model-vehicles.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const outputRoot = join(root, 'public', 'assets', 'models')
@@ -32,20 +30,6 @@ if (!globalThis.FileReader) {
 }
 
 const MODELS = [
-  ['buildings/aero_tower.glb', buildings.aeroTower],
-  ['buildings/aero_dome.glb', buildings.aeroDome],
-  ['buildings/townhouse.glb', buildings.townhouse],
-  ['buildings/kiosk.glb', buildings.kiosk],
-  ['buildings/greenhouse.glb', buildings.greenhouse],
-  ['buildings/lighthouse.glb', buildings.lighthouse],
-  ['buildings/eco_tower.glb', buildings.ecoTower],
-  ['buildings/aurora_observatory.glb', buildings.auroraObservatory],
-  ['buildings/metro_block.glb', buildings.metroBlock],
-  ['buildings/aqua_dome.glb', buildings.aquaDome],
-  ['buildings/aqua_tunnel.glb', buildings.aquaTunnel],
-  ['buildings/dark_spire.glb', buildings.darkSpire],
-  ['buildings/fotonight_tower.glb', buildings.fotonightTower],
-  ['buildings/dorf_pavilion.glb', buildings.dorfPavilion],
   ['nature/tree_round.glb', scenery.treeRound],
   ['nature/palm_tree.glb', scenery.palmTree],
   ['nature/flower_bed.glb', scenery.flowerBed],
@@ -63,10 +47,6 @@ const MODELS = [
   ['props/neon_sign.glb', scenery.neonSign],
   ['props/dorf_orb.glb', scenery.dorfOrb],
   ['props/metro_arch.glb', scenery.metroArch],
-  ['vehicles/car_aero.glb', vehicles.carAero],
-  ['vehicles/bus_aero.glb', vehicles.busAero],
-  ['vehicles/boat_aero.glb', vehicles.boatAero],
-  ['vehicles/balloon_aero.glb', vehicles.balloonAero],
 ]
 
 const AUTO_TILES = ['path_stone', 'fence_white'].flatMap((style) =>
@@ -107,7 +87,7 @@ async function main() {
   }
 
   console.log(
-    `\n${entries.length} modelos exportados (${(totalBytes / 1024 / 1024).toFixed(2)} MB)`,
+    `\n${entries.length} modelos procedurales exportados (${(totalBytes / 1024 / 1024).toFixed(2)} MB)`,
   )
   console.log(`Salida: ${outputRoot}`)
 }

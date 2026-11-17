@@ -22,7 +22,25 @@ function isMaterialSlot(value: string | undefined): value is MaterialSlot {
 }
 
 export function normalizeSlot(name: string | undefined): MaterialSlot {
-  return isMaterialSlot(name) ? name : 'solid'
+  if (isMaterialSlot(name)) return name
+  const normalized = name?.toLowerCase() ?? ''
+  if (
+    normalized.includes('glass') ||
+    normalized.includes('glazing') ||
+    normalized.includes('translucent')
+  )
+    return 'glass'
+  if (
+    normalized.includes('chrome') ||
+    normalized.includes('metal') ||
+    normalized.includes('rubber')
+  )
+    return 'metal'
+  if (normalized.includes('fabric') || normalized.includes('seat')) return 'fabric'
+  if (normalized.includes('lamp') || normalized.includes('light')) return 'emissive'
+  if (normalized.includes('floor') || normalized.includes('walkable')) return 'stone'
+  if (normalized.includes('basket')) return 'wood'
+  return 'solid'
 }
 
 function createMaterial(slot: MaterialSlot, definition: ThemeMaterialDefinition) {

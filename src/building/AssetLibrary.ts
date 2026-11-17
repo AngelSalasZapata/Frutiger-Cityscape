@@ -14,6 +14,11 @@ export interface AssetLoadResult {
   failed: readonly string[]
 }
 
+interface AssetSource {
+  readonly scene: THREE.Group
+  readonly animations: readonly THREE.AnimationClip[]
+}
+
 function isAutoTileCategory(category: CatalogItem['category']): boolean {
   return category === 'path' || category === 'fence'
 }
@@ -26,7 +31,7 @@ function assetUrl(path: string): string {
 
 export class AssetLibrary {
   private readonly loader = new GLTFLoader()
-  private readonly sources = new Map<string, THREE.Group>()
+  private readonly sources = new Map<string, AssetSource>()
   private readonly failures = new Set<string>()
 
   get loadedCount(): number {
@@ -47,7 +52,7 @@ export class AssetLibrary {
   }
 
   getSource(itemId: string, variant?: AutoTileVariant): THREE.Group | null {
-    return this.sources.get(this.keyFor(itemId, variant)) ?? null
+    return this.sources.get(this.keyFor(itemId, variant))?.scene ?? null
   }
 
   createInstanceModel(
@@ -56,10 +61,11 @@ export class AssetLibrary {
     materials: ThemeMaterialLibrary,
     color?: string,
   ): THREE.Object3D {
-    const source = this.getSource(item.id, variant)
+    const source = this.sources.get(this.keyFor(item.id, variant))
     if (!source) return this.createFallback(item, materials)
 
-    const model = source.clone(true)
+    const model = source.scene.clone(true)
+    model.userData.animationClips = source.animations
     applyThemeMaterials(model, materials, color)
     if (item.scale !== undefined) model.scale.setScalar(item.scale)
     return model
@@ -80,7 +86,7 @@ export class AssetLibrary {
 
   dispose(): void {
     for (const source of this.sources.values()) {
-      source.traverse((object) => {
+      source.scene.traverse((object) => {
         if (!(object instanceof THREE.Mesh)) return
         object.geometry.dispose()
         const materials = Array.isArray(object.material) ? object.material : [object.material]
@@ -102,7 +108,10 @@ export class AssetLibrary {
     for (const { variant, path } of paths) {
       try {
         const gltf = await this.loader.loadAsync(assetUrl(path))
-        this.sources.set(this.keyFor(item.id, variant), gltf.scene)
+        this.sources.set(this.keyFor(item.id, variant), {
+          scene: gltf.scene,
+          animations: gltf.animations,
+        })
       } catch (error) {
         this.failures.add(item.id)
         console.warn(`No se pudo cargar el modelo de "${item.id}" (${path})`, error)
