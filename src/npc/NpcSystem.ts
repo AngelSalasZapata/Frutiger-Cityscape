@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 
 import type { City, PlacedInstance } from '@/building/City'
+import type { InteractiveModelSystem } from '@/interaction/InteractiveModelSystem'
 import type { PhysicsWorld } from '@/physics/PhysicsWorld'
 import type { VehicleSystem } from '@/vehicles/VehicleSystem'
 
@@ -15,6 +16,8 @@ interface NpcState {
   symbol: string
   passengerVehicle: string | null
   rideUntil: number
+  insideStructure: string | null
+  insideUntil: number
 }
 
 const SYMBOLS = ['🙂', '💬', '👋', '😉', '♥', '♫']
@@ -31,6 +34,7 @@ export class NpcSystem {
     private readonly city: City,
     private readonly physics: PhysicsWorld,
     private readonly vehicles: VehicleSystem,
+    private readonly interactions: InteractiveModelSystem,
   ) {
     this.object.name = 'npc-effects'
   }
@@ -86,6 +90,8 @@ export class NpcSystem {
         symbol: '',
         passengerVehicle: null,
         rideUntil: 0,
+        insideStructure: null,
+        insideUntil: 0,
       })
     }
   }
@@ -109,12 +115,33 @@ export class NpcSystem {
       if (symbol !== state.symbol) this.setBubbleSymbol(state, symbol)
       if (this.elapsed >= state.rideUntil) {
         this.vehicles.leavePassenger(npc.id)
+        this.interactions.openEntry(passenger.vehicle)
         state.passengerVehicle = null
-        state.nextDecision = this.elapsed + 2 + Math.random() * 3
+        state.nextDecision = this.elapsed + this.randomStayDuration()
       }
       return
     }
     if (state.passengerVehicle) state.passengerVehicle = null
+
+    const structure = state.insideStructure ? this.city.instance(state.insideStructure) : null
+    if (structure && this.elapsed < state.insideUntil) {
+      const interior = this.anchorPosition(structure, 'Entry_Interior') ?? structure.object.position
+      this.physics.rideNpc(npc.id, interior, structure.object.quaternion)
+      npc.modelHolder.position.y = 0
+      state.bubble.position.copy(interior).add(new THREE.Vector3(0, npc.item.height + 0.45, 0))
+      if (state.symbol !== '🏠') this.setBubbleSymbol(state, '🏠')
+      return
+    }
+    if (structure) {
+      this.interactions.openEntry(structure)
+      const exterior = this.anchorPosition(structure, 'Entry_Exterior') ?? structure.object.position
+      this.physics.rideNpc(npc.id, exterior, structure.object.quaternion)
+      state.target.copy(exterior)
+      state.insideStructure = null
+      state.nextDecision = this.elapsed + this.randomStayDuration()
+      return
+    }
+    if (state.insideStructure) state.insideStructure = null
     const nearStructure = this.city
       .all()
       .some(
@@ -138,7 +165,16 @@ export class NpcSystem {
       const boarded = this.vehicles.boardPassenger(npc.id, position)
       if (boarded) {
         state.passengerVehicle = boarded
-        state.rideUntil = this.elapsed + 5 + Math.random() * 8
+        const vehicle = this.city.instance(boarded)
+        if (vehicle) this.interactions.openEntry(vehicle)
+        state.rideUntil = this.elapsed + this.randomStayDuration()
+        return
+      }
+      const building = this.closestStructure(position)
+      if (building) {
+        this.interactions.openEntry(building)
+        state.insideStructure = building.id
+        state.insideUntil = this.elapsed + this.randomStayDuration()
         return
       }
       state.target
@@ -223,6 +259,34 @@ export class NpcSystem {
 
   private npcs(): readonly PlacedInstance[] {
     return this.city.all().filter((instance) => instance.item.category === 'npc')
+  }
+
+  private closestStructure(position: THREE.Vector3): PlacedInstance | null {
+    return (
+      this.city
+        .all()
+        .filter(
+          (instance) =>
+            instance.item.category === 'building' &&
+            instance.object.position.distanceTo(position) < 1.45,
+        )
+        .sort(
+          (left, right) =>
+            left.object.position.distanceToSquared(position) -
+            right.object.position.distanceToSquared(position),
+        )[0] ?? null
+    )
+  }
+
+  private anchorPosition(instance: PlacedInstance, name: string): THREE.Vector3 | null {
+    const anchor = instance.modelHolder.getObjectByName(name)
+    if (!anchor) return null
+    anchor.updateWorldMatrix(true, false)
+    return anchor.getWorldPosition(new THREE.Vector3())
+  }
+
+  private randomStayDuration(): number {
+    return 5 + Math.random() * 25
   }
 
   private randomDirection(): THREE.Vector3 {

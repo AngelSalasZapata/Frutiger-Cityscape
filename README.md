@@ -173,6 +173,11 @@ La sección Vehículos incluye cuatro GLB interactivos, estilizados y escalados 
 con las **flechas**: arriba/abajo acelera o frena e izquierda/derecha gira. Soltar las teclas lo devuelve
 al tráfico.
 
+Las puertas y ventanas practicables se abren o cierran con un clic directo sobre su panel. Los vehículos
+circulan siempre durante Modo Jugar: siguen caminos si existen y, mientras se construye una red vial,
+recorren el terreno con destinos aleatorios. Los NPCs alternan paseos, viajes y visitas a edificios; cada
+estancia dentro de un vehículo o estructura dura aleatoriamente entre **5 y 30 segundos**.
+
 ## Controles actuales
 
 - **Clic izquierdo**: ejecutar la herramienta activa (seleccionar o construir).

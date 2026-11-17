@@ -52,6 +52,8 @@ describe('Catálogo', () => {
     expect(vehicle.physics).toBe('dynamic')
     expect(vehicle.vehicleBehavior).toBe('air')
     expect(vehicle.model).toBe('assets/models/vehicles/balloon_aero.glb')
+    expect(vehicle.scale).toBe(0.5)
+    expect(vehicle.footprint).toEqual([1, 1])
   })
 
   it('declara un medio de desplazamiento para cada vehículo', () => {
@@ -59,7 +61,11 @@ describe('Catálogo', () => {
     const behaviors = vehicles.map((vehicle) => vehicle.vehicleBehavior)
     expect(behaviors).toEqual(expect.arrayContaining(['road', 'water', 'air']))
     expect(behaviors.every(Boolean)).toBe(true)
-    expect(vehicles.every((vehicle) => vehicle.scale === undefined)).toBe(true)
+    expect(
+      vehicles
+        .filter((vehicle) => vehicle.id !== 'balloon_aero')
+        .every((vehicle) => vehicle.scale === undefined),
+    ).toBe(true)
   })
 
   it('referencia temas existentes o el comodín global', () => {

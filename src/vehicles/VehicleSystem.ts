@@ -64,6 +64,7 @@ export class VehicleSystem {
 
       if (controlled) this.driveSelected(vehicle, state, dt)
       else if (behavior === 'road' && roads.size > 0) this.driveRoad(vehicle, state, roads, dt)
+      else if (behavior === 'road') this.driveLand(vehicle, state, dt)
       else if (behavior === 'water') this.driveWater(vehicle, state, dt)
       else if (behavior === 'air') this.driveAir(vehicle, state, dt)
       this.updateModelAnimations(state, dt)
@@ -146,7 +147,10 @@ export class VehicleSystem {
   ): void {
     if (state.routeIndex >= state.route.length) this.createRoadRoute(state, roads)
     const targetCell = state.route[state.routeIndex]
-    if (!targetCell) return
+    if (!targetCell) {
+      this.driveLand(vehicle, state, dt)
+      return
+    }
     const target = this.positionForCell(targetCell)
     const distance = state.position.distanceTo(target)
     if (distance < 0.08) {
@@ -158,6 +162,15 @@ export class VehicleSystem {
     const speed = ROAD_SPEED * this.trafficFactor(vehicle.id, state, targetCell, roads)
     state.speed = speed
     this.moveToward(vehicle, state, target, Math.min(distance, speed * dt), true)
+  }
+
+  /** Mantiene los vehículos viales activos aun cuando aún no haya calles. */
+  private driveLand(vehicle: PlacedInstance, state: VehicleState, dt: number): void {
+    if (!state.target || state.position.distanceTo(state.target) < 0.18) {
+      state.target = this.randomLandTarget()
+    }
+    state.speed = ROAD_SPEED * 0.72
+    this.moveToward(vehicle, state, state.target, state.speed * dt, true)
   }
 
   private driveWater(vehicle: PlacedInstance, state: VehicleState, dt: number): void {
@@ -316,6 +329,14 @@ export class VehicleSystem {
     const cell = this.city.worldGrid.worldToCell(x, z)
     const ground = cell ? this.city.groundHeightAt(cell) : 0
     return new THREE.Vector3(x, ground + (landing ? 0.52 : 3.3 + Math.random() * 2.5), z)
+  }
+
+  private randomLandTarget(): THREE.Vector3 {
+    const half = this.city.worldGrid.halfSize - 1.2
+    const x = (Math.random() * 2 - 1) * half
+    const z = (Math.random() * 2 - 1) * half
+    const cell = this.city.worldGrid.worldToCell(x, z)
+    return new THREE.Vector3(x, cell ? this.city.groundHeightAt(cell) + 0.035 : 0.035, z)
   }
 
   private positionForCell(cell: GridCell): THREE.Vector3 {

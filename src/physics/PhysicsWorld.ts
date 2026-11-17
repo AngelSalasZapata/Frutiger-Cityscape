@@ -115,9 +115,46 @@ export class PhysicsWorld {
     this.npcThrownUntil.clear()
     this.world?.free()
     this.world = new this.api.World({ x: 0, y: -9.81, z: 0 })
-    const floor = this.api.ColliderDesc.cuboid(512, 0.08, 512).setTranslation(0, -0.08, 0)
-    this.world.createCollider(floor)
+    this.createTerrainColliders()
     this.syncInstances()
+  }
+
+  /**
+   * La física sigue la isla y su relieve; no usa un plano infinito que haga
+   * que el agua se comporte como suelo o que objetos atraviesen las colinas.
+   */
+  private createTerrainColliders(): void {
+    if (!this.world) return
+    const grid = this.city.worldGrid
+    const baseDepth = 1.45
+    this.world.createCollider(
+      this.api.ColliderDesc.cuboid(grid.halfSize, baseDepth, grid.halfSize).setTranslation(
+        0,
+        -baseDepth,
+        0,
+      ),
+    )
+
+    const samples = Math.min(grid.size, 32)
+    const tileSize = grid.size / samples
+    const half = grid.halfSize
+    for (let z = 0; z < samples; z += 1) {
+      for (let x = 0; x < samples; x += 1) {
+        const worldX = -half + (x + 0.5) * tileSize
+        const worldZ = -half + (z + 0.5) * tileSize
+        const cell = grid.worldToCell(worldX, worldZ)
+        if (!cell) continue
+        const height = this.city.groundHeightAt(cell)
+        if (height <= 0.02) continue
+        this.world.createCollider(
+          this.api.ColliderDesc.cuboid(tileSize / 2, height / 2, tileSize / 2).setTranslation(
+            worldX,
+            height / 2,
+            worldZ,
+          ),
+        )
+      }
+    }
   }
 
   private syncInstances(): void {

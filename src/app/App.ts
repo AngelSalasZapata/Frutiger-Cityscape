@@ -20,6 +20,7 @@ import { disposeObject3D } from '@/utils/dispose'
 import { AeroParticles } from '@/fx/AeroParticles'
 import { PhysicsWorld } from '@/physics/PhysicsWorld'
 import { NpcSystem } from '@/npc/NpcSystem'
+import { InteractiveModelSystem } from '@/interaction/InteractiveModelSystem'
 import { VehicleSystem } from '@/vehicles/VehicleSystem'
 import { World } from '@/world/World'
 import {
@@ -65,6 +66,7 @@ export class App {
   private readonly physics: PhysicsWorld
   private readonly npcs: NpcSystem
   private readonly vehicles: VehicleSystem
+  private readonly interactions: InteractiveModelSystem
   private readonly subscriptions: (() => void)[] = []
 
   private world: World
@@ -126,7 +128,12 @@ export class App {
       this.bus,
     )
     this.vehicles = new VehicleSystem(this.city, this.physics)
-    this.npcs = new NpcSystem(this.city, this.physics, this.vehicles)
+    this.interactions = new InteractiveModelSystem(
+      this.city,
+      this.cameraRig.camera,
+      this.renderer.instance.domElement,
+    )
+    this.npcs = new NpcSystem(this.city, this.physics, this.vehicles, this.interactions)
     this.scene.add(this.npcs.object)
 
     this.subscriptions.push(
@@ -185,6 +192,7 @@ export class App {
     this.physics.dispose()
     this.npcs.dispose()
     this.vehicles.dispose()
+    this.interactions.dispose()
     this.city.dispose()
     this.library.dispose()
     this.hud.dispose()
@@ -364,6 +372,7 @@ export class App {
     this.physics.update(dt)
     this.npcs.update(dt)
     this.vehicles.update(dt)
+    this.interactions.update(dt)
     this.particles.update(dt)
     if (this.scene.fog instanceof THREE.Fog) {
       this.dayCycle.update(dt, this.sky, this.lighting, this.scene.fog)

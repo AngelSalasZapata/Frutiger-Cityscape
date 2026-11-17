@@ -220,11 +220,23 @@ vial seleccionado se controla con flechas y vuelve al tráfico al soltarlas.
 
 `NpcSystem` reserva plazas cuando un habitante se encuentra cerca de un vehículo disponible, sincroniza su
 pose con el pasajero durante un paseo corto y lo libera después. La lancha y el globo solo son abordables
-cuando alcanzan una altura cercana al suelo/agua. El catálogo v0.6.3 reemplaza todos los vehículos por
+cuando alcanzan una altura cercana al suelo/agua. Los NPCs también usan `Entry_Exterior` y `Entry_Interior`
+para alternar estancias dentro de edificios. Ambas estancias se sortean entre 5 y 30 segundos. El catálogo
+v0.6.4 reemplaza todos los vehículos por
 `car_aero`, `bus_aero`, `boat_aero` y `balloon_aero` en `public/assets/models/vehicles/`. Estos assets
 incluyen asientos, puntos `Board_*` y clips glTF; `AssetLibrary` conserva los clips en cada instancia y
 `VehicleSystem` reproduce `Wheels_Roll` para auto y autobús según su velocidad. Los alias de material
 importados se traducen a las ranuras del tema Aero (`glass`, `metal`, `fabric`, `emissive`, etc.).
+
+### Interacciones y colisiones v0.6.4
+
+`InteractiveModelSystem` recibe el clic sobre los pivotes de puerta o ventana de los GLB, reproduce en
+avance o retroceso los clips `Open_*` y bloquea el gesto para que no se convierta en un agarre físico. Las
+entradas de NPC y los abordajes abren la puerta correspondiente antes de cambiar de estado.
+
+`PhysicsWorld` reemplaza el plano de colisión infinito por la base exacta de la isla y una retícula de
+colliders que sigue las colinas. Así el agua permanece fuera del suelo físico y los objetos dinámicos ya no
+se cortan a través de la plataforma ni de la elevación del terreno.
 
 ## Empaquetado de escritorio
 
